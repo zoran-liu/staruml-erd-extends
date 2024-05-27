@@ -449,8 +449,6 @@ function addEitityView() {
         type.ERDColumnCompartmentView = view.ERDColumnCompartmentView
         type.ERDColumn = view.ERDColumn
         type.ERDEntity = view.ERDEntity
-        // addColumnField();
-        // addEitityField();
     } else {
         setTimeout(addEitityView, 0)
     }
@@ -461,7 +459,6 @@ function init() {
     addColumnField();
     addEitityField();
     addEitityView();
-    // addColumnView();
 }
 
 exports.init = init
