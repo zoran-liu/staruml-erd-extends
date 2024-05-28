@@ -82,6 +82,20 @@ function buildERDEntityView() {
         getNameString() {
             return this.name + (this.label ? `(${this.label})` : "")
         }
+
+        get textualNotation() {
+            var str = this.name
+            if (this.label && this.label.length > 0) {
+                str += '(' + this.label + ')'
+            }
+            if (this.type && this.type.length > 0) {
+                str = str + ': ' + this.type
+                if (this.length) {
+                    str = str + '(' + this.length + ')'
+                }
+            }
+            return str
+        }
     }
 
     const ERDEntityType = type.ERDEntity;
@@ -92,6 +106,14 @@ function buildERDEntityView() {
             super()
             this.label = ''
             this.comment = ''
+        }
+
+        get textualNotation() {
+            var str = this.name
+            if (this.label && this.label.length > 0) {
+                str += '(' + this.label + ')'
+            }
+            return str
         }
     }
 
