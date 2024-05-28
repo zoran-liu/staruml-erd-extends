@@ -83,18 +83,8 @@ function buildERDEntityView() {
             return this.name + (this.label ? `(${this.label})` : "")
         }
 
-        get textualNotation() {
-            var str = this.name
-            if (this.label && this.label.length > 0) {
-                str += '(' + this.label + ')'
-            }
-            if (this.type && this.type.length > 0) {
-                str = str + ': ' + this.type
-                if (this.length) {
-                    str = str + '(' + this.length + ')'
-                }
-            }
-            return str
+        getLabelString() {
+            return this.label
         }
     }
 
@@ -108,12 +98,8 @@ function buildERDEntityView() {
             this.comment = ''
         }
 
-        get textualNotation() {
-            var str = this.name
-            if (this.label && this.label.length > 0) {
-                str += '(' + this.label + ')'
-            }
-            return str
+        getLabelString() {
+            return this.label
         }
     }
 
