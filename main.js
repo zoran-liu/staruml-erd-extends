@@ -24,12 +24,12 @@ function buildERDEntityView() {
             this.removeSubView(this.columnCompartment)
             this.columnCompartment = new type.ERDColumnCompartmentView()
             this.columnCompartment.parentStyle = true
+            this.addSubView(this.columnCompartment)
         }
 
         update(canvas) {
             let modelName = null;
             if (this.model) {
-                console.log(this.model)
                 modelName = this.model.name;
                 this.model.name = modelName + (this.model.label ? `(${this.model.label})` : "")
             }
