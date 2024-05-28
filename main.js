@@ -69,9 +69,9 @@ function buildERDEntityView() {
         }
     }
 
-    const ERDColumnTyp = type.ERDColumn
+    const ERDColumnType = type.ERDColumn
 
-    class ERDColumn extends ERDColumnTyp {
+    class ERDColumn extends ERDColumnType {
 
         constructor() {
             super()
