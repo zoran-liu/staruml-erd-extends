@@ -29,6 +29,7 @@ function buildERDEntityView() {
         update(canvas) {
             let modelName = null;
             if (this.model) {
+                console.log(this.model)
                 modelName = this.model.name;
                 this.model.name = modelName + (this.model.label ? `(${this.model.label})` : "")
             }
