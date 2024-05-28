@@ -1,11 +1,11 @@
-var comment = {
+const comment = {
     'default': "",
     'kind': "prim",
     'name': "comment",
     'type': "String",
     'visible': true
 }
-var label = {
+const label = {
     'default': "",
     'kind': "prim",
     'name': "label",
