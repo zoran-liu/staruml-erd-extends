@@ -15,7 +15,7 @@ const label = {
 
 function buildERDEntityView() {
 
-    let ERDEntityViewType = type.ERDEntityView;
+    const ERDEntityViewType = type.ERDEntityView;
 
     class ERDEntityView extends ERDEntityViewType {
 
@@ -40,11 +40,8 @@ function buildERDEntityView() {
         }
     }
 
-    let ERDColumnCompartmentViewType = type.ERDColumnCompartmentView;
+    const ERDColumnCompartmentViewType = type.ERDColumnCompartmentView;
 
-    /**
-     * ERDColumnCompartmentView
-     */
     class ERDColumnCompartmentView extends ERDColumnCompartmentViewType {
 
         constructor() {
@@ -64,7 +61,6 @@ function buildERDEntityView() {
                         columnView = new type.ERDColumnView()
                         columnView.model = column
                         columnView._parent = this
-                        // Insert columnView to subViews by bypass command.
                         app.repository.bypassInsert(this, 'subViews', columnView)
                     }
                 }
@@ -73,11 +69,8 @@ function buildERDEntityView() {
         }
     }
 
-    let ERDColumnTyp = type.ERDColumn
+    const ERDColumnTyp = type.ERDColumn
 
-    /**
-     * ERDColumn
-     */
     class ERDColumn extends ERDColumnTyp {
 
         constructor() {
@@ -91,11 +84,8 @@ function buildERDEntityView() {
         }
     }
 
-    let ERDEntityType = type.ERDEntity;
+    const ERDEntityType = type.ERDEntity;
 
-    /**
-     * ERDEntity
-     */
     class ERDEntity extends ERDEntityType {
 
         constructor() {
