@@ -12,6 +12,13 @@ const label = {
     'type': "String",
     'visible': true
 }
+const label2comment = {
+    'default': true,
+    'kind': "prim",
+    'name': "label2comment",
+    'type': "Boolean",
+    'visible': true
+}
 
 function buildERDEntityView() {
 
@@ -77,21 +84,23 @@ function buildERDEntityView() {
             super()
             this.label = ''
             this.comment = ''
+            this.label2comment = true
         }
 
         getNameString() {
             return this.name + (this.label ? `(${this.label})` : "")
         }
-        get textualNotation(){
-            var str=this.name
-            if(this.type&&this.type.length>0){
-                str=str+": "+this.type
-                if(this.length){
-                    str=str+'('+this.length+')'
+
+        get textualNotation() {
+            var str = this.name
+            if (this.type && this.type.length > 0) {
+                str = str + ": " + this.type
+                if (this.length) {
+                    str = str + '(' + this.length + ')'
                 }
             }
-            if(this.label&&this.label.length>0){
-                str=str+"@ "+this.label
+            if (this.label && this.label.length > 0) {
+                str = str + "@ " + this.label
             }
             return str
         }
@@ -106,11 +115,12 @@ function buildERDEntityView() {
             this.label = ''
             this.comment = ''
         }
-        get textualNotation(){
-            var str=this.name
+
+        get textualNotation() {
+            var str = this.name
             console.log(this.name)
-            if(this.label&&this.label.length>0){
-                str=str+"@ "+this.label
+            if (this.label && this.label.length > 0) {
+                str = str + "@ " + this.label
             }
             return str
         }
@@ -128,11 +138,11 @@ function addColumnField() {
     }
 }
 
-function addEitityField() {
+function addEntityField() {
     if (global.meta.ERDEntity) {
-        global.meta.ERDEntity.attributes = [label, ...global.meta.ERDEntity.attributes, comment]
+        global.meta.ERDEntity.attributes = [label, ...global.meta.ERDEntity.attributes, comment, label2comment]
     } else {
-        setTimeout(addEitityField, 0)
+        setTimeout(addEntityField, 0)
     }
 }
 
@@ -147,78 +157,98 @@ function addEitityView() {
         setTimeout(addEitityView, 0)
     }
 }
-function addColumnCommand(){
-    if(app.commands.commands["erd:set-column-expression"]){
-        let command=app.commands.commands["erd:set-column-expression"]
-        app.commands.commands["erd:set-column-expression"]=(p)=>{
-            let index=p.value.indexOf("@")
-            if(index>=0){
-                var label=p.value.substring(index+1)
-                p.value=p.value.substring(0,index)
-                p.model.label=label.trim()
-                if(!p.model.comment){
-                    p.model.comment=p.model.label
+
+function addColumnCommand() {
+    if (app.commands.commands["erd:set-column-expression"]) {
+        let command = app.commands.commands["erd:set-column-expression"]
+        app.commands.commands["erd:set-column-expression"] = (p) => {
+            if(p.value.startsWith("PK:")){
+                p.model.primaryKey=true
+                p.model.nullable=false
+                p.value=p.value.substring(3).trim()
+            }
+            if(p.value.startsWith("UK:")){
+                p.model.unique=true
+                p.value=p.value.substring(3).trim()
+            }
+            if(p.value.startsWith("FK:")){
+                p.model.foreignKey=true
+                p.value=p.value.substring(3).trim()
+            }
+            if(p.value.startsWith("NN:")){
+                p.model.nullable=false
+                p.value=p.value.substring(3).trim()
+            }
+            let index = p.value.indexOf("@")
+            if (index >= 0) {
+                var label = p.value.substring(index + 1)
+                p.value = p.value.substring(0, index)
+                p.model.label = label.trim()
+                if (!p.model.comment||p.model._parent.label2comment) {
+                    p.model.comment = p.model.label
                 }
             }
             return command(p)
         }
-    }else{
-        setTimeout(addColumnCommand,0)
+    } else {
+        setTimeout(addColumnCommand, 0)
     }
 }
-function addEntityCommand(){
-    if(app.commands.commands["erd:set-column-expression"]){
-        app.commands.commands["erd:set-entity-expression"]=(p)=>{
-            let index=p.value.indexOf("@")
-            let fields={}
-            if(index>=0){
-                var label=p.value.substring(index+1)
-                p.value=p.value.substring(0,index)
-                fields.label=label.trim()
-                if(!p.model.comment){
-                    fields.comment=p.model.label
+
+function addEntityCommand() {
+    if (app.commands.commands["erd:set-column-expression"]) {
+        app.commands.commands["erd:set-entity-expression"] = (p) => {
+            let index = p.value.indexOf("@")
+            let fields = {}
+            if (index >= 0) {
+                var label = p.value.substring(index + 1)
+                p.value = p.value.substring(0, index)
+                fields.label = label.trim()
+                if (p.model.label2comment||!p.model.comment) {
+                    fields.comment = fields.label
                 }
             }
-            fields.name=p.value
-            let elem=p.model
+            fields.name = p.value
+            let elem = p.model
             app.engine.setProperties(elem, fields)
         }
-    }else{
-        setTimeout(addEntityCommand,0)
+    } else {
+        setTimeout(addEntityCommand, 0)
     }
 }
-function addEntityQuickEdit(){
-    if(app.quickedits.quickedits){
-        let entity=null;
-        for(let i=0;i<app.quickedits.quickedits.length;i++){
-            if("erd.entity"==app.quickedits.quickedits[i].id){
-                entity=app.quickedits.quickedits[i]
+
+function addEntityQuickEdit() {
+    if (app.quickedits.quickedits) {
+        let entity = null;
+        for (let i = 0; i < app.quickedits.quickedits.length; i++) {
+            if ("erd.entity" == app.quickedits.quickedits[i].id) {
+                entity = app.quickedits.quickedits[i]
                 break;
             }
         }
-        if(!entity){
-            setTimeout(addEntityQuickEdit,0)
+        if (!entity) {
+            setTimeout(addEntityQuickEdit, 0)
         }
-        let component=null;
-        for(let i=0;i<entity.components.length;i++){
-            if("erd.set-name"==entity.components[i].id){
-                component=entity.components[i]
+        let component = null;
+        for (let i = 0; i < entity.components.length; i++) {
+            if ("erd.set-name" == entity.components[i].id) {
+                component = entity.components[i]
                 break;
             }
         }
-        if(!component){
-            setTimeout(addEntityQuickEdit,0)
+        if (!component) {
+            setTimeout(addEntityQuickEdit, 0)
         }
-        component.command="erd:set-entity-expression"
-        component.property="textualNotation"
-    }else{
-        setTimeout(addEntityQuickEdit,0)
+        component.command = "erd:set-entity-expression"
+        component.property = "textualNotation"
+    } else {
+        setTimeout(addEntityQuickEdit, 0)
     }
 }
 
 function init() {
     addColumnField();
-    addEitityField();
+    addEntityField();
     addEitityView();
     addColumnCommand();
     addEntityCommand();
