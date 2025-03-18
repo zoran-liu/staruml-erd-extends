@@ -179,6 +179,10 @@ function addColumnCommand() {
                 p.model.nullable=false
                 p.value=p.value.substring(3).trim()
             }
+            if(p.value.startsWith("NU:")){
+                p.model.nullable=true
+                p.value=p.value.substring(3).trim()
+            }
             let index = p.value.indexOf("@")
             if (index >= 0) {
                 var label = p.value.substring(index + 1)
