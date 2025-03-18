@@ -19,6 +19,13 @@ const label2comment = {
     'type': "Boolean",
     'visible': true
 }
+const defaultValue = {
+    'default': "",
+    'kind': "prim",
+    'name': "defaultValue",
+    'type': "String",
+    'visible': true
+}
 
 function buildERDEntityView() {
 
@@ -85,6 +92,25 @@ function buildERDEntityView() {
             this.label = ''
             this.comment = ''
             this.label2comment = true
+            this.nullable = true
+            this.defaultValue = ''
+        }
+
+        getKeyString() {
+            let _key = this.primaryKey ? "PK," : ""
+            if (this.foreignKey) {
+                _key += "FK,"
+            }
+            if (!this.primaryKey && !this.nullable) {
+                _key += "NN,"
+            }
+            if (!this.primaryKey && this.unique) {
+                _key += "U,"
+            }
+            if (_key.length > 0) {
+                _key = _key.substring(0, _key.length - 1)
+            }
+            return _key
         }
 
         getNameString() {
@@ -92,7 +118,22 @@ function buildERDEntityView() {
         }
 
         get textualNotation() {
-            var str = this.name
+            let str = ''
+            if (this.primaryKey) {
+                str += "PK: "
+            }
+            if (this.unique) {
+                str += "UK: "
+            }
+            if (this.foreignKey) {
+                str += "FK: "
+            }
+            if (this.nullable) {
+                str += "NU: "
+            } else {
+                str += "NN: "
+            }
+            str += this.name
             if (this.type && this.type.length > 0) {
                 str = str + ": " + this.type
                 if (this.length) {
@@ -101,6 +142,9 @@ function buildERDEntityView() {
             }
             if (this.label && this.label.length > 0) {
                 str = str + "@ " + this.label
+            }
+            if (this.defaultValue && this.defaultValue.length > 0) {
+                str = str + " => " + this.defaultValue
             }
             return str
         }
@@ -117,7 +161,7 @@ function buildERDEntityView() {
         }
 
         get textualNotation() {
-            var str = this.name
+            let str = this.name
             console.log(this.name)
             if (this.label && this.label.length > 0) {
                 str = str + "@ " + this.label
@@ -132,7 +176,7 @@ function buildERDEntityView() {
 
 function addColumnField() {
     if (global.meta.ERDColumn) {
-        global.meta.ERDColumn.attributes = [label, ...global.meta.ERDColumn.attributes, comment]
+        global.meta.ERDColumn.attributes = [label, ...global.meta.ERDColumn.attributes, comment, defaultValue]
     } else {
         setTimeout(addField, 0)
     }
@@ -162,33 +206,40 @@ function addColumnCommand() {
     if (app.commands.commands["erd:set-column-expression"]) {
         let command = app.commands.commands["erd:set-column-expression"]
         app.commands.commands["erd:set-column-expression"] = (p) => {
-            if(p.value.startsWith("PK:")){
-                p.model.primaryKey=true
-                p.model.nullable=false
-                p.value=p.value.substring(3).trim()
+            let hasPrefix = true
+            do {
+                if (p.value.startsWith("PK:")) {
+                    p.model.primaryKey = true
+                    p.model.nullable = false
+                    p.value = p.value.substring(3).trim()
+                } else if (p.value.startsWith("UK:")) {
+                    p.model.unique = true
+                    p.value = p.value.substring(3).trim()
+                } else if (p.value.startsWith("FK:")) {
+                    p.model.foreignKey = true
+                    p.value = p.value.substring(3).trim()
+                } else if (p.value.startsWith("NN:")) {
+                    p.model.nullable = false
+                    p.value = p.value.substring(3).trim()
+                } else if (p.value.startsWith("NU:")) {
+                    p.model.nullable = true
+                    p.value = p.value.substring(3).trim()
+                } else {
+                    hasPrefix = false
+                }
+            } while (hasPrefix)
+            let index = p.value.indexOf("=>")
+            if (index >= 0) {
+                var defaultValue = p.value.substring(index + 2)
+                p.value = p.value.substring(0, index)
+                p.model.defaultValue = defaultValue.trim()
             }
-            if(p.value.startsWith("UK:")){
-                p.model.unique=true
-                p.value=p.value.substring(3).trim()
-            }
-            if(p.value.startsWith("FK:")){
-                p.model.foreignKey=true
-                p.value=p.value.substring(3).trim()
-            }
-            if(p.value.startsWith("NN:")){
-                p.model.nullable=false
-                p.value=p.value.substring(3).trim()
-            }
-            if(p.value.startsWith("NU:")){
-                p.model.nullable=true
-                p.value=p.value.substring(3).trim()
-            }
-            let index = p.value.indexOf("@")
+            index = p.value.indexOf("@")
             if (index >= 0) {
                 var label = p.value.substring(index + 1)
                 p.value = p.value.substring(0, index)
                 p.model.label = label.trim()
-                if (!p.model.comment||p.model._parent.label2comment) {
+                if (!p.model.comment || p.model._parent.label2comment) {
                     p.model.comment = p.model.label
                 }
             }
@@ -208,7 +259,7 @@ function addEntityCommand() {
                 var label = p.value.substring(index + 1)
                 p.value = p.value.substring(0, index)
                 fields.label = label.trim()
-                if (p.model.label2comment||!p.model.comment) {
+                if (p.model.label2comment || !p.model.comment) {
                     fields.comment = fields.label
                 }
             }
