@@ -211,6 +211,7 @@ function addColumnCommand() {
                 if (p.value.startsWith("PK:")) {
                     p.model.primaryKey = true
                     p.model.nullable = false
+                    console.log(p.model)
                     p.value = p.value.substring(3).trim()
                 } else if (p.value.startsWith("UK:")) {
                     p.model.unique = true
@@ -221,7 +222,7 @@ function addColumnCommand() {
                 } else if (p.value.startsWith("NN:")) {
                     p.model.nullable = false
                     p.value = p.value.substring(3).trim()
-                } else if (p.value.startsWith("NU:")) {
+                } else if (!p.model.primaryKey && p.value.startsWith("NU:")) {
                     p.model.nullable = true
                     p.value = p.value.substring(3).trim()
                 } else {
