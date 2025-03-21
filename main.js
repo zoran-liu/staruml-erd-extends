@@ -162,7 +162,6 @@ function buildERDEntityView() {
 
         get textualNotation() {
             let str = this.name
-            console.log(this.name)
             if (this.label && this.label.length > 0) {
                 str = str + "@ " + this.label
             }
@@ -211,7 +210,6 @@ function addColumnCommand() {
                 if (p.value.startsWith("PK:")) {
                     p.model.primaryKey = true
                     p.model.nullable = false
-                    console.log(p.model)
                     p.value = p.value.substring(3).trim()
                 } else if (p.value.startsWith("UK:")) {
                     p.model.unique = true
